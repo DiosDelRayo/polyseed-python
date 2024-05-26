@@ -1,10 +1,12 @@
 from typing import Tuple
-from . import POLYSEED_NUM_WORDS
+from . import PolyseedData, SECRET_BYTES, CHAR_BIT, SECRET_BITS, FEATURE_BITS, DATE_BITS, DATE_MASK, POLYSEED_NUM_WORDS
 
 GF_BITS = 11
 GF_SIZE = 1 << GF_BITS
 GF_MASK = GF_SIZE - 1
 POLY_NUM_CHECK_DIGITS = 1
+SHARE_BITS = 10  # bits of the secret per word
+DATA_WORDS = POLYSEED_NUM_WORDS - POLY_NUM_CHECK_DIGITS
 
 polyseed_mul2_table = [5, 7, 1, 3, 13, 15, 9, 11]
 
@@ -30,10 +32,7 @@ def gf_elem_mul2(x: int) -> int:
         return 2 * x
     return polyseed_mul2_table[x % 8] + 16 * ((x - 1024) // 8)
 
-SHARE_BITS = 10  # bits of the secret per word
-DATA_WORDS = POLYSEED_NUM_WORDS - POLY_NUM_CHECK_DIGITS
-
-def data_to_poly(data: 'polyseed.PolyseedData') -> GFPoly:
+def data_to_poly(data: PolyseedData) -> GFPoly:
     extra_val = (data.features << DATE_BITS) | data.birthday
     extra_bits = FEATURE_BITS + DATE_BITS
 
@@ -72,8 +71,7 @@ def data_to_poly(data: 'polyseed.PolyseedData') -> GFPoly:
 
     return GFPoly(tuple(coeffs))
 
-def poly_to_data(poly: GFPoly) -> 'polyseed.PolyseedData':
-    from polyseed import PolyseedData, SECRET_BYTES, CHAR_BIT, SECRET_BITS, FEATURE_BITS, DATE_BITS, DATE_MASK, POLYSEED_NUM_WORDS
+def poly_to_data(poly: GFPoly) -> PolyseedData:
 
     data = PolyseedData()
     data.birthday = 0

@@ -1,4 +1,4 @@
-import unicodedata
+from unicodedata import normalize
 
 POLYSEED_LANG_SIZE = 2048
 POLYSEED_NUM_WORDS = 24
@@ -181,12 +181,12 @@ def polyseed_lang_check(lang):
 
     # all words must be in NFKD
     for word in lang["words"]:
-        norm = unicodedata.normalize("NFKD", word)
+        norm = normalize("NFKD", word)
         assert word == norm, "incorrectly normalized wordlist"
 
     # accented languages must be composed
     assert not lang["has_accents"] or lang["compose"]
 
     # normalized separator must be a space
-    separator = unicodedata.normalize("NFKD", lang["separator"])
+    separator = normalize("NFKD", lang["separator"])
     assert separator == " "
