@@ -4,6 +4,7 @@ from hashlib import sha256
 from lzma import compress as lzma
 from base64 import b85encode
 from re import search
+from argparse import ArgumentParser
 
 WORD_PATTERN = r'("|u8")(.*?)",?'
 STRING_PATTERN = r'\.([a-z_]+)\s+=\s+(u8)?"(.*)",?'
@@ -88,3 +89,32 @@ def write_py_file(data: Dict, filename: Union[str, Path]) -> None:
     with open(filename, 'w') as f:
         f.write(out)
         f.close()
+
+def process_source_folder(source_folder: Union[str, Path], target_folder: Union[str, Path]) -> None:
+    source_folder = Path(source_folder).absolute()
+    target_folder = Path(target_folder).absolute()
+    
+    if not source_folder.is_dir():
+        raise Exception(f'Source folder {source_folder} does not exist.')
+        
+    if not target_folder.is_dir():
+        raise Exception(f'Target folder {target_folder} does not exist.')
+        
+    c_files = [file for file in source_folder.glob('lang_??.c') if file.is_file()]
+    
+    for c_file in c_files:
+        try:
+            parsed_data = parse_c_file(c_file)
+            target_filename = target_folder / (c_file.stem + '.py')
+            write_py_file(parsed_data, target_filename)
+        except Exception:
+            print(f'Error in {c_file}')
+
+if __name__ == '__main__':
+    parser = ArgumentParser(description='Import languages from original polyseed repo')
+    parser.add_argument('source', help='Path to the original polyseed source folder')
+    parser.add_argument('target', help='Path to the target folder')
+    
+    args = parser.parse_args()
+
+    process_source_folder(args.source, args.target)
