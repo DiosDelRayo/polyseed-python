@@ -1,3 +1,4 @@
+from .constants import CLEAR_MASK
 from typing import List
 from random import randint
 

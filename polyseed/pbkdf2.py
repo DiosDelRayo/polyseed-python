@@ -6,7 +6,7 @@ from struct import pack
 def store32_be(i: int) -> bytes:
     return pack(">I", i)
 
-def crypto_pbkdf2_sha256(passwd: Union[str, bytes], salt: Union[str, bytes], c: int, dkLen: int) -> bytes:
+def pbkdf2_sha256(passwd: Union[str, bytes], salt: Union[str, bytes], c: int, dkLen: int) -> bytes:
     if type(passwd) == 'str':
         passwd = passwd.encode()
     if type(salt) == 'str':

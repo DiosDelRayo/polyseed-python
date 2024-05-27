@@ -10,24 +10,25 @@ from .constants import (
     GF_MASK,
     POLY_NUM_CHECK_DIGITS,
     SHARE_BITS,
-    DATA_WORDS
+    DATA_WORDS,
+    SECRET_BUFFER_SIZE
 )
 from .storage import PolyseedData
 
-from typing import Tuple
+from typing import List
 
 
 polyseed_mul2_table = [5, 7, 1, 3, 13, 15, 9, 11]
 
 class GFPoly:
-    def __init__(self, coeffs: Tuple[int, ...]):
-        self.coeffs = coeffs
+    def __init__(self, coeffs: List[int]):
+        self.coeffs = list(coeffs)
 
     def set_checksum(self, checksum: int) -> None:
         self.coeffs[0] = checksum
 
     def get_checksum(self) -> int:
-        return self.checksum
+        return self.coeffs[0]
 
     def set_coin(self, coin: int) -> None:
         self.coeffs[POLY_NUM_CHECK_DIGITS] ^= coin
@@ -52,8 +53,9 @@ class GFPoly:
 
     def to_data(self) -> PolyseedData:
 
-        data = PolyseedData()
-        data.checksum = self.get_checksum()
+        # data = PolyseedData()
+        # data.checksum = self.get_checksum()
+        secret = bytearray(SECRET_BUFFER_SIZE)
 
         extra_val = 0
         extra_bits = 0
@@ -83,8 +85,10 @@ class GFPoly:
                 word_bits -= chunk_bits
                 chunk_mask = (1 << chunk_bits) - 1
                 if chunk_bits < CHAR_BIT:
-                    data.secret[secret_idx] <<= chunk_bits
-                data.secret[secret_idx] |= (word_val >> word_bits) & chunk_mask
+                    # data.secret[secret_idx] <<= chunk_bits
+                    secret[secret_idx] <<= chunk_bits
+                # data.secret[secret_idx] |= (word_val >> word_bits) & chunk_mask
+                secret[secret_idx] |= (word_val >> word_bits) & chunk_mask
                 secret_bits += chunk_bits
 
         seed_bits += secret_bits
@@ -93,8 +97,12 @@ class GFPoly:
         assert seed_bits == SECRET_BITS
         assert extra_bits == FEATURE_BITS + DATE_BITS
 
-        data.birthday = extra_val & DATE_MASK
-        data.features = extra_val >> DATE_BITS
+        #data.birthday = extra_val & DATE_MASK
+        #data.features = extra_val >> DATE_BITS
+
+        # test
+        data = PolyseedData(extra_val & DATE_MASK, extra_val >> DATE_BITS, bytes(secret), self.get_checksum())
+        # end test
 
         return data
 

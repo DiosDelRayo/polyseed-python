@@ -24,8 +24,11 @@ class PolyseedData:
         self.secret = secret[:SECRET_SIZE]
         self.checksum = checksum & 0x7F  # GF_MASK
 
+    def __eq__(self, obj: 'PolyseedData') -> bool:
+        return self.birthday == obj.birthday and self.features == obj.features and self.secret == obj.secret and self.checksum == obj.checksum
+
     def store(self) -> bytes:
-        storage = STORAGE_HEADER.copy()
+        storage = bytearray(STORAGE_HEADER)
         pos = HEADER_SIZE
         storage[pos:pos+2] = pack('<H', (self.features << 10) | self.birthday)
         pos += 2
@@ -34,7 +37,7 @@ class PolyseedData:
         storage.append(EXTRA_BYTE)
         pos += 1
         storage[pos:pos+2] = pack('<H', STORAGE_FOOTER | self.checksum)
-        return storage
+        return bytes(storage)
 
     @classmethod
     def load(cls, storage: bytes) -> 'PolyseedData':

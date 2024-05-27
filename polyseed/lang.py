@@ -5,24 +5,12 @@ from .constants import (
 )
 from .exceptions import (
     PolyseedLanguageException,
-    PolyseedMultipleLanguagesException
+    PolyseedMultipleLanguagesException,
+    PolyseedLanguageNotFoundException
 )
 
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from unicodedata import normalize
-
-
-# Import language data from other files
-from .lang_en import polyseed_lang_en
-# from lang_jp import polyseed_lang_jp
-# from lang_ko import polyseed_lang_ko
-# from lang_es import polyseed_lang_es
-# from lang_zh_s import polyseed_zh_s
-# from lang_zh_t import polyseed_zh_t
-# from lang_fr import polyseed_lang_fr
-# from lang_it import polyseed_lang_it
-# from lang_cs import polyseed_lang_cs
-# from lang_pt import polyseed_lang_pt
 
 class Language:
 
@@ -36,51 +24,46 @@ class Language:
     compose: bool
     words: List[str]
 
-    languages: List = [
-        # sorted wordlists first
-        # https://github.com/bitcoin/bips/blob/master/bip-0039/bip-0039-wordlists.md
-        polyseed_lang_en,
-        # polyseed_lang_jp,
-        # polyseed_lang_ko,
-        # polyseed_lang_es,
-        # polyseed_lang_fr,
-        # polyseed_lang_it,
-        # polyseed_lang_cs,
-        # polyseed_lang_pt,
-        # polyseed_zh_s,
-        # polyseed_zh_t,
-    ]
+    languages: Dict = {}
 
     @classmethod
-    def get_num_langs(cls) -> int:
+    def register(cls) -> None:
+        cls.languages[cls.code] = cls
+
+    @classmethod
+    def get_lang_by_code(cls, code: str) -> 'Language':
+        if code not in cls.languages:
+            raise PolyseedLanguageNotFoundException()
+        return cls.languages[code]
+
+    @classmethod
+    def get_lang_by_name_en(cls, name: str) -> 'Language':
+        for lang in cls.languages.values():
+            if lang.name_en == name:
+                return lang
+        raise PolyseedLanguageNotFoundException()
+
+    @classmethod
+    def get_lang_count(cls) -> int:
         return len(cls.languages)
 
     @classmethod
-    def polyseed_get_lang(i: int) -> Dict:
-        assert 0 <= i < cls.get_num_langs()
-        return languages[i]
+    def get_lang(cls, i: int) -> 'Language':
+        if 0 < i or i > cls.get_num_langs():
+            raise PolyseedLanguageNotFoundException()
+        return cls.get_lang_by_code(cls.languages.keys()[i])
 
-    @staticmethod
-    def get_lang_name(lang: Dict) -> str:
-        return lang["name"]
-
-    @staticmethod
-    def get_lang_name_en(lang: Dict) -> str:
-        return lang["name_en"]
-
-    @staticmethod
-    def lang_search(lang: Dict, word: str, cmp) -> int:
-        if lang["is_sorted"]:
+    @classmethod
+    def search(cls, word: str, cmp) -> int:
+        if cls.is_sorted:
             try:
-                idx = lang["words"].index(word)
-                return idx
+                return cls.words.index(word)
             except ValueError:
                 return -1
-        else:
-            for i, w in enumerate(lang["words"]):
-                if cmp(word, w) == 0:
-                    return i
-            return -1
+        for i, w in enumerate(cls.words):
+            if cmp(word, w) == 0:
+                return i
+        return -1
 
     @staticmethod
     def compare_str(key: str, elm):  # TODO: ?
@@ -118,7 +101,6 @@ class Language:
 
     @staticmethod
     def compare_str_noaccent_wrap(key, elm):
-        key, elm = a, b
         return compare_str_noaccent(key, elm)
 
     @staticmethod
@@ -131,33 +113,37 @@ class Language:
     def compare_prefix_noaccent_wrap(key, elm):
         return compare_prefix_noaccent(key, elm, NUM_CHARS_PREFIX)
 
-    @staticmethod
-    def get_comparer(lang: Dict):
-        if lang["has_prefix"]:
-            if lang["has_accents"]:
-                return compare_prefix_noaccent_wrap
+    @classmethod
+    def get_comparer(cls):
+        if cls.has_prefix:
+            if cls.has_accents:
+                return cls.compare_prefix_noaccent_wrap
             else:
-                return compare_prefix_wrap
+                return cls.compare_prefix_wrap
+        if lang.has_accents:
+            return cls.compare_str_noaccent_wrap
         else:
-            if lang["has_accents"]:
-                return compare_str_noaccent_wrap
-            else:
-                return compare_str_wrap
+            return cls.compare_str_wrap
 
-    @staticmethod
-    def polyseed_lang_find_word(lang: Dict, word: str):
-        cmp = get_comparer(lang)
-        return lang_search(lang, word, cmp)
+    @classmethod
+    def find_word(cls, word: str) -> int:
+        cmp = cls.get_comparer()
+        return cls.search(word, cmp)
 
-    @staticmethod
-    def phrase_decode(phrase: str, lang_out=None) -> List[int]:
+    @classmethod
+    def phrase_encode(cls, data: List[int]) -> str:
+        return cls.separator.join([cls.words[i] for i in data])
+
+    @classmethod
+    def phrase_decode(cls, phrase: List[str]) -> Tuple[List[int], 'Language']:
         out: List[int] = [0] * POLYSEED_NUM_WORDS
         have_lang = False
-        for lang in languages:
-            cmp = get_comparer(lang)
+        for lang in cls.languages.values():
+            cmp = lang.get_comparer()
             success = True
             for wi, word in enumerate(phrase):
-                value = lang_search(lang, word, cmp)
+                value = lang.search(word, cmp)
+                # value = lang.words.index(word)
                 if value < 0:
                     success = False
                     break
@@ -167,42 +153,53 @@ class Language:
             if have_lang:
                 raise PolyseedMultipleLanguagesException()
             have_lang = True
-            if lang_out is not None:
-                lang_out[:] = [lang]
         if not have_lang:
             raise PolyseedLanguageException()
-        return out
+        return out, lang
 
-    @staticmethod
-    def phrase_decode_explicit(phrase: str, lang: Dict) -> List[int]:
+    @classmethod
+    def phrase_decode_explicit(cls, phrase: str) -> List[int]:
         out: List[int] = []
-        cmp = get_comparer(lang)
+        cmp = cls.get_comparer()
         for wi, word in enumerate(phrase):
-            value = lang_search(lang, word, cmp)
+            value = cls.search(word, cmp)
             if value < 0:
                 raise PolyseedLanguageException()
             out.append(value)
         return out
 
 
-    @staticmethod
-    def polyseed_lang_check(lang: Dict):
+    @classmethod
+    def check(cls):
         # check the language is sorted correctly
-        if lang["is_sorted"]:
-            cmp = get_comparer(lang)
-            prev = lang["words"][0]
-            for word in lang["words"][1:]:
+        if cls.is_sorted:
+            cmp = cls.get_comparer()
+            prev = cls.words
+            for word in cls.words[1:]:
                 assert cmp(prev, word) < 0, "incorrectly sorted wordlist"
                 prev = word
 
         # all words must be in NFKD
-        for word in lang["words"]:
+        for word in cls.words:
             norm = normalize("NFKD", word)
             assert word == norm, "incorrectly normalized wordlist"
 
         # accented languages must be composed
-        assert not lang["has_accents"] or lang["compose"]
+        assert not cls.has_accents or cls.compose
 
         # normalized separator must be a space
-        separator = normalize("NFKD", lang["separator"])
+        separator = normalize("NFKD", cls.separator)
         assert separator == " "
+
+from .lang_en import LanguageEnglish
+# Import language data from other files
+# from .lang_en import polyseed_lang_en
+# from lang_jp import polyseed_lang_jp
+# from lang_ko import polyseed_lang_ko
+# from lang_es import polyseed_lang_es
+# from lang_zh_s import polyseed_zh_s
+# from lang_zh_t import polyseed_zh_t
+# from lang_fr import polyseed_lang_fr
+# from lang_it import polyseed_lang_it
+# from lang_cs import polyseed_lang_cs
+# from lang_pt import polyseed_lang_pt

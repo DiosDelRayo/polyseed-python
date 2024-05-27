@@ -16,14 +16,14 @@ from lzma import decompress as lzma
 from base64 import b85decode
 from hashlib import sha256
 from typing import List
-from .language import Language
+from .lang import Language
 
 WORDS = '{{ WORDS }}'
 words = lzma(b85decode(WORDS.encode()))
 assert sha256(words).hexdigest() == '{{ CHECKSUM }}'
 words = words.decode().split(' ')
 
-{{ class_name }}(Language):
+class Language{{ class_name }}(Language):
 
     code: str = '{{ code }}'
     name: str = '{{ name }}'
@@ -33,8 +33,9 @@ words = words.decode().split(' ')
     has_prefix: bool = {{ has_prefix }}
     has_accents: bool = {{ has_accents }}
     compose: bool = {{ compose }}
-    words: Dict[str] = words
-}
+    words: List[str] = words
+
+Language{{ class_name }}.register()
 """.strip()
 
 
@@ -110,11 +111,13 @@ def process_source_folder(source_folder: Union[str, Path], target_folder: Union[
         try:
             parsed_data = parse_c_file(c_file)
             parsed_data['code'] = c_file.stem[5:]
-            parsed_data['class_name'] == parsed_data['name_en'].replace(' ','').replace('(', '').replace(')', '')
+            parsed_data['class_name'] = parsed_data['name_en'].replace(' ','').replace('(', '').replace(')', '')
+            print(parsed_data['class_name'])
             target_filename = target_folder / (c_file.stem + '.py')
             write_py_file(parsed_data, target_filename)
-        except Exception:
-            print(f'Error in {c_file}')
+        except Exception as e:
+            print(f'Error in {c_file}: {e}')
+            print(e)
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Import languages from original polyseed repo')
