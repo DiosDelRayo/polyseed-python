@@ -29,7 +29,7 @@ from typing import Union
 class Polyseed:
 
     @staticmethod
-    def polyseed_create(features: int) -> PolyseedData:
+    def create(features: int) -> PolyseedData:
         seed_features = make_features(features)
         if not polyseed_features_supported(seed_features):
             raise PolyseedFeatureUnsupported()
@@ -115,7 +115,7 @@ class Polyseed:
             raise PolyseedFeatureUnsupported()
         return seed
 
-    # TODO: code missing! Whatever there happend
+    # TODO: code missing! Whatever there happend, seems I deleted something while I have not seen anything.
     @staticmethod
     def decode_explicit(phrase: str, coin: int, lang: Language):
         assert phrase
