@@ -1,11 +1,5 @@
-from .birthday import *
 from .features import *
 from .lang import *
-from .storage import *
-from .gf import *
-
-class Polyseed:
-
-    @classmethod
-    def create(cls) -> Polyseed:
-        pass
+from .storage import PolyseedData
+from .gf import GFPoly
+from .polyseed import Polyseed

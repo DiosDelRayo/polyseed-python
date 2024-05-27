@@ -15,21 +15,25 @@ TEMPLATE = """
 from lzma import decompress as lzma
 from base64 import b85decode
 from hashlib import sha256
+from typing import List
+from .language import Language
 
 WORDS = '{{ WORDS }}'
 words = lzma(b85decode(WORDS.encode()))
 assert sha256(words).hexdigest() == '{{ CHECKSUM }}'
 words = words.decode().split(' ')
 
-polyseed_lang_en = {
-    'name': '{{ name }}',
-    'name_en': '{{ name_en }}',
-    'separator': '{{ separator }}',
-    'is_sorted': {{ is_sorted }},
-    'has_prefix': {{ has_prefix }},
-    'has_accents': {{ has_accents }},
-    'compose': {{ compose }},
-    'words': words
+{{ class_name }}(Language):
+
+    code: str = '{{ code }}'
+    name: str = '{{ name }}'
+    name_en: str = '{{ name_en }}'
+    separator: str = '{{ separator }}'
+    is_sorted: bool = {{ is_sorted }}
+    has_prefix: bool = {{ has_prefix }}
+    has_accents: bool = {{ has_accents }}
+    compose: bool = {{ compose }}
+    words: Dict[str] = words
 }
 """.strip()
 
@@ -100,11 +104,13 @@ def process_source_folder(source_folder: Union[str, Path], target_folder: Union[
     if not target_folder.is_dir():
         raise Exception(f'Target folder {target_folder} does not exist.')
         
-    c_files = [file for file in source_folder.glob('lang_??.c') if file.is_file()]
+    c_files = [file for file in source_folder.glob('lang_*.c') if file.is_file()]
     
     for c_file in c_files:
         try:
             parsed_data = parse_c_file(c_file)
+            parsed_data['code'] = c_file.stem[5:]
+            parsed_data['class_name'] == parsed_data['name_en'].replace(' ','').replace('(', '').replace(')', '')
             target_filename = target_folder / (c_file.stem + '.py')
             write_py_file(parsed_data, target_filename)
         except Exception:

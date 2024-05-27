@@ -1,10 +1,12 @@
-FEATURE_BITS = 5
-FEATURE_MASK = (1 << FEATURE_BITS) - 1
+from .constants import (
+    FEATURE_BITS,
+    FEATURE_MASK,
+    INTERNAL_FEATURES,
+    USER_FEATURES,
+    USER_FEATURES_MASK,
+    ENCRYPTED_MASK
+)
 
-INTERNAL_FEATURES = 2
-USER_FEATURES = 3
-USER_FEATURES_MASK = (1 << USER_FEATURES) - 1
-ENCRYPTED_MASK = 16
 reserved_features = FEATURE_MASK ^ ENCRYPTED_MASK
 
 def make_features(user_features: int) -> int:

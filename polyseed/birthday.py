@@ -1,8 +1,9 @@
-EPOCH = 1635768000
-TIME_STEP = 2629746
-
-DATE_BITS = 10
-DATE_MASK = ((1 << DATE_BITS) - 1)
+from .constants import (
+    EPOCH,
+    TIME_STEP,
+    DATE_BITS,
+    DATE_MASK
+)
 
 def birthday_encode(time: int) -> int:
     """
