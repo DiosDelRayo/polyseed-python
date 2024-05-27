@@ -151,3 +151,11 @@ class Polyseed:
         
         # Perform key derivation
         return pbkdf2_sha256(seed.secret, bytes(salt), KDF_NUM_ITERATIONS, key_size)
+
+    @staticmethod
+    def crypt(seed: PolyseedData, password: Union[str, bytes]) -> PolyseedData:
+        raise Exception('Not implemented yet, kick developers ass')  # TODO: implementation missing
+
+    @staticmethod:
+        def is_encrypted(seed: PolyseedData) -> bool:
+        raise Exception('Not implemented yet, kick developers ass')  # TODO: implementation missing
