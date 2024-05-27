@@ -23,6 +23,7 @@ from .pbkdf2 import pbkdf2_sha256
 from time import time
 from unicodedata import normalize
 from struct import pack
+from typing import Union
 
 
 class Polyseed:
@@ -156,6 +157,6 @@ class Polyseed:
     def crypt(seed: PolyseedData, password: Union[str, bytes]) -> PolyseedData:
         raise Exception('Not implemented yet, kick developers ass')  # TODO: implementation missing
 
-    @staticmethod:
-        def is_encrypted(seed: PolyseedData) -> bool:
+    @staticmethod
+    def is_encrypted(seed: PolyseedData) -> bool:
         raise Exception('Not implemented yet, kick developers ass')  # TODO: implementation missing
