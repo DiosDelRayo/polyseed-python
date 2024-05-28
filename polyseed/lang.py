@@ -143,7 +143,6 @@ class Language:
             success = True
             for wi, word in enumerate(phrase):
                 value = lang.search(word, cmp)
-                print(f'word: {word} -> {value}')
                 # value = lang.words.index(word)
                 if value < 0:
                     success = False
@@ -156,8 +155,7 @@ class Language:
             have_lang = True
         if not have_lang:
             raise PolyseedLanguageException()
-        print(out)
-        print(type(out))
+        print(f'Words:       {out}')
         return out, lang
 
     @classmethod

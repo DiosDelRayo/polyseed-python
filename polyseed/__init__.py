@@ -30,9 +30,13 @@ def show_polyseed(polyseed: Polyseed) -> None:
     key = polyseed.keygen()
     encrypted = 'yes' if polyseed.is_encrypted() else 'no'
     phrase = polyseed.encode()
+    data = [int(b) for b in polyseed.seed.secret]
     out = f'''
+coeff:       {polyseed.poly.coeffs}
+Data:        {data}
 private key: {key.hex()}
 phrase:      {phrase}
 encrypted:   {encrypted}
+secret:      {polyseed.seed.secret.hex()}
     '''.strip()
     print(out)

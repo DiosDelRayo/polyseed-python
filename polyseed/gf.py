@@ -52,11 +52,10 @@ class GFPoly:
         return polyseed_mul2_table[x % 8] + 16 * ((x - 1024) // 8)
 
     def to_data(self) -> PolyseedData:
-
-        # data = PolyseedData()
-        # data.checksum = self.get_checksum()
+        data = PolyseedData()  # Assuming PolyseedData() constructor initializes all fields to 0
+        data.checksum = self.coeffs[0]
+        
         secret = bytearray(SECRET_BUFFER_SIZE)
-
         extra_val = 0
         extra_bits = 0
 
@@ -81,29 +80,27 @@ class GFPoly:
                     secret_idx += 1
                     seed_bits += secret_bits
                     secret_bits = 0
+                
                 chunk_bits = min(word_bits, CHAR_BIT - secret_bits)
                 word_bits -= chunk_bits
                 chunk_mask = (1 << chunk_bits) - 1
+
                 if chunk_bits < CHAR_BIT:
-                    # data.secret[secret_idx] <<= chunk_bits
-                    secret[secret_idx] <<= chunk_bits
-                # data.secret[secret_idx] |= (word_val >> word_bits) & chunk_mask
-                secret[secret_idx] |= (word_val >> word_bits) & chunk_mask
+                    secret[secret_idx] = ((secret[secret_idx] << chunk_bits) & 0xFF)  # Apply mask to limit to 8 bits
+
+                secret[secret_idx] |= (word_val >> chunk_bits) & chunk_mask
                 secret_bits += chunk_bits
-
+        
         seed_bits += secret_bits
-
+        
         assert word_bits == 0
         assert seed_bits == SECRET_BITS
         assert extra_bits == FEATURE_BITS + DATE_BITS
-
-        #data.birthday = extra_val & DATE_MASK
-        #data.features = extra_val >> DATE_BITS
-
-        # test
-        data = PolyseedData(extra_val & DATE_MASK, extra_val >> DATE_BITS, bytes(secret), self.get_checksum())
-        # end test
-
+        
+        data.birthday = extra_val & DATE_MASK
+        data.features = extra_val >> DATE_BITS
+        data.secret = bytes(secret)
+        
         return data
 
     @classmethod

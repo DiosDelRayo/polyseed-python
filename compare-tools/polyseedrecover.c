@@ -12,6 +12,19 @@
 
 #include "pbkdf2.h"
 
+typedef uint_fast16_t gf_elem;
+
+
+/* Seed data structure for serialization */
+typedef struct polyseed_data {
+    unsigned birthday;
+    unsigned features;
+    /* padded with zeroes for future compatibility with longer seeds */
+    uint8_t secret[32];
+    gf_elem checksum;
+} polyseed_data;
+
+
 #define MIN(a,b) ((a)>(b)?(b):(a))
 
 static size_t utf8_nfc(const char* str, polyseed_str norm) {
@@ -82,9 +95,17 @@ int main(int argc, char* argv[]) {
         printf("ERROR: %i\n", result);
         return 1;
     }
-    printf("Detected language: %s\n", polyseed_get_lang_name_en(lang));
+    //printf("Detected language: %s\n", polyseed_get_lang_name_en(lang));
 
-    printf("Encrypted: %s\n", polyseed_is_encrypted(seed) ? "true" : "false");
+    printf("encrypted:   %s\n", polyseed_is_encrypted(seed) ? "yes" : "no");
+
+    printf("Data:        [");
+    for (unsigned i = 0; i < sizeof(seed->secret); ++i) {
+	    printf("%i", seed->secret[i] & 0xff);
+	    if(i != sizeof(seed->secret) - 1)
+		    printf(", ");
+    }
+    printf("]\n");
 
     if (polyseed_get_feature(seed, FEATURE_FOO)) {
         printf("Seed has the 'Foo' feature\n");
@@ -103,14 +124,7 @@ int main(int argc, char* argv[]) {
     //recover the key
     uint8_t key2[32];
     polyseed_keygen(seed, POLYSEED_MONERO, sizeof(key2), key2);
-    printf("Data:  [");
-    for (unsigned i = 0; i < sizeof(key2); ++i) {
-	    printf("%i", key2[i] & 0xff);
-	    if(i != sizeof(key2) - 1)
-		    printf(", ");
-    }
-    printf("]\n");
-    printf("Private key: ");
+    printf("private key: ");
     for (unsigned i = 0; i < sizeof(key2); ++i)
 	    printf("%02x", key2[i] & 0xff);
     printf("\n");

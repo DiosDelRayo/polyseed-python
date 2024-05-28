@@ -176,9 +176,13 @@ class Polyseed:
         salt[13] = 0xff
         salt[14] = 0xff
         salt[15] = 0xff
-        salt.extend(pack('<I', self.coin))
-        salt.extend(pack('<I', self.seed.birthday))
-        salt.extend(pack('<I', self.seed.features))
+        salt[16] = self.coin  # TODO: doublecheck and test
+        salt[20] = self.seed.birthday  # TODO: doublecheck and test
+        salt[24] = self.seed.features  # TODO: doublecheck and test
+        # salt.extend(pack('<I', self.coin))
+        # salt.extend(pack('<I', self.seed.birthday))
+        # salt.extend(pack('<I', self.seed.features))
+        print(f'salt:        {salt.hex()}')
         
         # Perform key derivation
         return pbkdf2_sha256(self.seed.secret, bytes(salt), KDF_NUM_ITERATIONS, key_size)
