@@ -8,7 +8,8 @@ from .constants import (
     STORAGE_HEADER,
     HEADER_SIZE,
     EXTRA_BYTE,
-    STORAGE_FOOTER
+    STORAGE_FOOTER,
+    ENCRYPTED_MASK
 )
 from .exceptions import PolyseedDataFormatException
 
@@ -26,6 +27,9 @@ class PolyseedData:
 
     def __eq__(self, obj: 'PolyseedData') -> bool:
         return self.birthday == obj.birthday and self.features == obj.features and self.secret == obj.secret and self.checksum == obj.checksum
+
+    def set_encrypted(self) -> None:
+        self.features = self.features ^ ENCRYPTED_MASK
 
     def store(self) -> bytes:
         storage = bytearray(STORAGE_HEADER)

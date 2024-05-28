@@ -49,9 +49,9 @@ class Language:
 
     @classmethod
     def get_lang(cls, i: int) -> 'Language':
-        if 0 < i or i > cls.get_num_langs():
+        if 0 < i or i > cls.get_lang_count():
             raise PolyseedLanguageNotFoundException()
-        return cls.get_lang_by_code(cls.languages.keys()[i])
+        return cls.get_lang_by_code(list(cls.languages.keys())[i])
 
     @classmethod
     def search(cls, word: str, cmp) -> int:
@@ -155,6 +155,8 @@ class Language:
             have_lang = True
         if not have_lang:
             raise PolyseedLanguageException()
+        print(out)
+        print(type(out))
         return out, lang
 
     @classmethod

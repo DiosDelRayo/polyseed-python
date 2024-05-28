@@ -31,7 +31,7 @@ class GFPoly:
         return self.coeffs[0]
 
     def set_coin(self, coin: int) -> None:
-        self.coeffs[POLY_NUM_CHECK_DIGITS] ^= coin
+        self.coeffs[POLY_NUM_CHECK_DIGITS] = self.coeffs[POLY_NUM_CHECK_DIGITS] ^ coin
 
     def eval(self) -> int:
         """Horner's method at x = 2"""
@@ -41,7 +41,7 @@ class GFPoly:
         return result
 
     def encode(self) -> None:
-        self.coeffs = (*self.coeffs[:-1], self.eval())
+        self.coeffs = [*self.coeffs[:-1], self.eval()]
 
     def check(self) -> bool:
         return self.eval() == 0
