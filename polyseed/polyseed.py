@@ -122,8 +122,8 @@ class Polyseed:
         poly.set_coin(coin)
 
         # checksum
-        #if not poly.check():
-        #    raise PolyseedChecksumException()
+        if not poly.check():
+            raise PolyseedChecksumException()
 
         # decode polynomial into seed data
         seed = poly.to_data()

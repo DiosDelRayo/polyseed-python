@@ -61,7 +61,7 @@ class Language:
             except ValueError:
                 return -1
         for i, w in enumerate(cls.words):
-            if cmp(word, w) == 0:
+            if word == w:
                 return i
         return -1
 
@@ -120,7 +120,7 @@ class Language:
                 return cls.compare_prefix_noaccent_wrap
             else:
                 return cls.compare_prefix_wrap
-        if lang.has_accents:
+        if cls.has_accents:
             return cls.compare_str_noaccent_wrap
         else:
             return cls.compare_str_wrap
@@ -143,6 +143,7 @@ class Language:
             success = True
             for wi, word in enumerate(phrase):
                 value = lang.search(word, cmp)
+                print(f'word: {word} -> {value}')
                 # value = lang.words.index(word)
                 if value < 0:
                     success = False

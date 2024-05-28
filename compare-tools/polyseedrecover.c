@@ -103,9 +103,16 @@ int main(int argc, char* argv[]) {
     //recover the key
     uint8_t key2[32];
     polyseed_keygen(seed, POLYSEED_MONERO, sizeof(key2), key2);
+    printf("Data:  [");
+    for (unsigned i = 0; i < sizeof(key2); ++i) {
+	    printf("%i", key2[i] & 0xff);
+	    if(i != sizeof(key2) - 1)
+		    printf(", ");
+    }
+    printf("]\n");
     printf("Private key: ");
     for (unsigned i = 0; i < sizeof(key2); ++i)
-		printf("%02x", key2[i] & 0xff);
+	    printf("%02x", key2[i] & 0xff);
     printf("\n");
 
     polyseed_free(seed);

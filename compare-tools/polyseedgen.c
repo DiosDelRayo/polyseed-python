@@ -93,6 +93,13 @@ int main(int argc, char* argv[]) {
     //generate a key from the seed
     uint8_t key1[32];
     polyseed_keygen(seed1, POLYSEED_MONERO, sizeof(key1), key1);
+    printf("Data:  [");
+    for (unsigned i = 0; i < sizeof(key1); ++i) {
+	    printf("%i", key1[i] & 0xff);
+	    if(i != sizeof(key1) - 1)
+		    printf(", ");
+    }
+    printf("]\n");
     printf("Private key: ");
     for (unsigned i = 0; i < sizeof(key1); ++i)
 		printf("%02x", key1[i] & 0xff);
