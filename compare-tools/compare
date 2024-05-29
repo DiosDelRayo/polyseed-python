@@ -1,0 +1,21 @@
+#!/bin/bash
+if [ -z "$1" ]
+then
+	echo "Please use: $0 <key to compare>"
+	exit 1
+fi
+
+VALUE=$1
+PYTHON=$(python -m polyseed recover 'label cart fee spice decorate next holiday stand mom clown cool huge repeat expire giraffe own' | grep "$VALUE")
+C=$(./compare-tools/polyseed-recover 'label cart fee spice decorate next holiday stand mom clown cool huge repeat expire giraffe own' | grep "$VALUE")
+echo -e "${PYTHON}\n${C}"
+VALUE_P=$(echo -n "$PYTHON" | sed -e "s/^${VALUE}:\s*//")
+VALUE_C=$(echo -n "$C" | sed -e "s/^${VALUE}:\s*//")
+if [ "${VALUE_P}" = "${VALUE_C}" ]
+then
+	echo 'OK'
+	exit 0
+else
+	echo 'FAILED'
+	exit 1
+fi
