@@ -13,7 +13,7 @@ Todo:
        - [ ] crypt salt is same
        - [ ] encode is same
        - [ ] crypt is same
- - [ ] generate
+ - [ ] **investigate and fix wrong output on generate**
  - [X] build some compare tools using the original library and `pbkdf2_sha256` implementation
  - [x] add convinience command line function to compare to original implementation
  - [ ] refactor, so everything necessary is directly under the module (__init__.py) and only the necessary
