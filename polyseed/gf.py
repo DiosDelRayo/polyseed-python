@@ -53,7 +53,6 @@ class GFPoly:
 
     def to_data(self) -> PolyseedData:
         data = PolyseedData()  # Assuming PolyseedData() constructor initializes all fields to 0
-        print(self.coeffs)
         data.checksum = self.coeffs[0]
         
         secret = bytearray([0] * SECRET_BUFFER_SIZE)
