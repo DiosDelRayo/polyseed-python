@@ -7,7 +7,7 @@ Todo:
        I need to split the this bites on decode and join that two bytes for encode...
        - [x] Words to GFPoly coeff same result
        - [x] coeff the same before GFPoly -> PolyseedData
-       - [ ] PolyseedData secret is the same -> FAILED: `GFPoly->to_data()` culprit
+       - [x] PolyseedData secret is the same (TIP: never make assumptions, check, then check again, and check once more...)
        - [x] key salt is same
        - [ ] key is same
        - [ ] crypt salt is same

@@ -1,4 +1,4 @@
-CHAR_BIT = 16  # TODO: quick fix, check why, probably some C lenght constant
+CHAR_BIT = 8  # TODO: quick fix, check why, probably some C lenght constant
 POLYSEED_NUM_WORDS = 16
 SECRET_SIZE = 32
 ENCRYPTED_MASK = 268435456

@@ -53,9 +53,10 @@ class GFPoly:
 
     def to_data(self) -> PolyseedData:
         data = PolyseedData()  # Assuming PolyseedData() constructor initializes all fields to 0
+        print(self.coeffs)
         data.checksum = self.coeffs[0]
         
-        secret = bytearray(SECRET_BUFFER_SIZE)
+        secret = bytearray([0] * SECRET_BUFFER_SIZE)
         extra_val = 0
         extra_bits = 0
 
@@ -86,9 +87,9 @@ class GFPoly:
                 chunk_mask = (1 << chunk_bits) - 1
 
                 if chunk_bits < CHAR_BIT:
-                    secret[secret_idx] = ((secret[secret_idx] << chunk_bits) & 0xFF)  # Apply mask to limit to 8 bits
+                    secret[secret_idx] <<= chunk_bits
 
-                secret[secret_idx] |= (word_val >> chunk_bits) & chunk_mask
+                secret[secret_idx] |= (word_val >> word_bits) & chunk_mask
                 secret_bits += chunk_bits
         
         seed_bits += secret_bits

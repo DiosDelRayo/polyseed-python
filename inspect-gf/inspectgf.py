@@ -90,11 +90,11 @@ for i in range(POLY_NUM_CHECK_DIGITS, POLYSEED_NUM_WORDS):
         if chunk_bits < CHAR_BIT:
             print(f"         -> CHAR_BIT > chunk_bits: {chunk_bits}")
             data_secret[secret_idx] <<= chunk_bits
-            print(f"         => data_secret {secret_idx}: {data_secret[secret_idx]}")
+            print(f"         => data_secret[{secret_idx}]: {data_secret[secret_idx]}")
 
-        print(f"         -> data_secret {secret_idx}: {data_secret[secret_idx]}, word_val: {word_val}, word_bits: {word_bits}, chunk_mask: {chunk_mask}")
+        print(f"         -> data_secret[{secret_idx}]: {data_secret[secret_idx]}, word_val: {word_val}, word_bits: {word_bits}, chunk_mask: {chunk_mask}")
         data_secret[secret_idx] |= (word_val >> word_bits) & chunk_mask
-        print(f"         => data_secret {secret_idx}: {data_secret[secret_idx]}, word_val: {word_val}, word_bits: {word_bits}, chunk_mask: {chunk_mask}")
+        print(f"         => data_secret[{secret_idx}]: {data_secret[secret_idx]}, word_val: {word_val}, word_bits: {word_bits}, chunk_mask: {chunk_mask}")
         print(f"         -> secret_bits: {secret_bits}, chunk_bits: {chunk_bits}")
         secret_bits += chunk_bits
         print(f"         => secret_bits: {secret_bits}, chunk_bits: {chunk_bits}")

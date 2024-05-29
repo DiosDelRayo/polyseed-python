@@ -116,8 +116,8 @@ int main(int argc, char* argv[]) {
 	printf("=========================================================================\n");
 	print_secret(data_secret, sizeof(data_secret));
 	printf("checksum: %lu\n", data_checksum);
-	printf("birthday:  %u\n", data_birthday);
-	printf("features:  %08b\n", data_features);
+	printf("birthday: %u\n", data_birthday);
+	printf("features: %08b\n", data_features);
 	if(compare_secret(data_secret, sizeof(data_secret)))
 		printf("Secret correct.\n");
 	else
