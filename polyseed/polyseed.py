@@ -27,7 +27,7 @@ from .pbkdf2 import pbkdf2_sha256
 from time import time
 from unicodedata import normalize
 from struct import pack
-from typing import Union, Optional
+from typing import Union, Optional, Callable
 
 
 class Polyseed:
@@ -38,23 +38,24 @@ class Polyseed:
         self.coin: int = coin
 
     @staticmethod
-    def create(features: int) -> 'Polyseed':
+    def create(features: int = 0, coin: int = POLYSEED_MONERO, random: Callable[[int], bytes] = random_secret) -> 'Polyseed':
         seed_features = make_features(features)
         if not polyseed_features_supported(seed_features):
             raise PolyseedFeatureUnsupported()
 
-        poly: GFPoly = GFPoly.from_data(
-            PolyseedData(
-                birthday_encode(time()),
-                seed_features,
-                random_secret(SECRET_SIZE),
-                0
-            )
+        secret_bytes = bytearray(random(SECRET_SIZE))
+        secret_bytes[-1] &= CLEAR_MASK
+        seed: PolyseedData = PolyseedData(
+            birthday_encode(time()),
+            seed_features,
+            bytes(secret_bytes),
+            0
         )
+        poly: GFPoly = GFPoly.from_data(seed)
         # calculate checksum
         poly.encode()
         # MEMZERO_LOC(poly)
-        return Polyseed(poly.to_data(), poly)
+        return Polyseed(poly.to_data(), poly, coin)
 
     # TODO: makes this any sense in Python???
     @staticmethod
@@ -73,7 +74,7 @@ class Polyseed:
             raise Exception('Polyseed has acctually no seed')
         return get_features(self.seed.features, mask)
 
-    def encode(self, lang: Optional[Language] = None, coin: int = POLYSEED_MONERO) -> str:
+    def encode(self, lang: Optional[Language] = None) -> str:
         if not self.seed:
             raise Exception('Polyseed has acctually no seed')
         if not lang:
@@ -87,7 +88,7 @@ class Polyseed:
         if not self.poly:
             self.poly = GFPoly.from_data(self.seed)
         # apply coin
-        self.poly.set_coin(coin)
+        self.poly.set_coin(self.coin)
 
         # output words
         out = lang.phrase_encode(self.poly.coeffs)
@@ -122,6 +123,7 @@ class Polyseed:
         # finalize polynomial
         poly.set_coin(coin)
 
+        #poly.encode()
         # checksum
         if not poly.check():
             raise PolyseedChecksumException()
@@ -132,7 +134,7 @@ class Polyseed:
         # check features
         if not polyseed_features_supported(seed.features):
             raise PolyseedFeatureUnsupported()
-        return Polyseed(seed, poly)
+        return Polyseed(seed, poly, coin)
 
     @staticmethod
     def decode_explicit(phrase: str, coin: int, lang: Language) -> 'Polyseed':
@@ -154,8 +156,8 @@ class Polyseed:
         poly.set_coin(coin)
 
         # checksum
-        #if not poly.check():
-        #    raise PolyseedChecksumException()
+        if not poly.check():
+            raise PolyseedChecksumException()
 
         # decode polynomial into seed data
         seed = poly.to_data()
@@ -163,7 +165,7 @@ class Polyseed:
         # check features
         if not polyseed_features_supported(seed.features):
             raise PolyseedFeatureUnsupported()
-        return Polyseed(seed, poly)
+        return Polyseed(seed, poly, coin)
 
     def keygen(self, key_size: int = 32) -> bytes:
         if not self.seed:
@@ -206,6 +208,7 @@ class Polyseed:
         self.seed.secret = bytes(secret)
         self.seed.set_encrypted()
         self.poly = GFPoly.from_data(self.seed)
+        self.poly.encode()
         self.seed = self.poly.to_data()
 
     def is_encrypted(self) -> bool:

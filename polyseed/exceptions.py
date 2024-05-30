@@ -22,3 +22,6 @@ class PolyseedWordCountMissmatchException(Exception):
 
 class PolyseedChecksumException(Exception):
     pass
+
+class PolyseedMissingPasswordException(Exception):
+    pass

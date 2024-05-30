@@ -6,6 +6,7 @@ from .constants import (
     USER_FEATURES_MASK,
     ENCRYPTED_MASK
 )
+from .exceptions import PolyseedMissingPasswordException
 from .lang import Language
 from .storage import PolyseedData
 from .gf import GFPoly
@@ -15,7 +16,9 @@ from .pbkdf2 import pbkdf2_sha256
 from typing import Optional
 
 def generate(password: Optional[str]) -> Polyseed:
-    polyseed = Polyseed.create(0)  # TODO: what is sane or do I need to expose to arguments?
+    polyseed = Polyseed.create()  # TODO: what is sane or do I need to expose to arguments?
+    key = polyseed.keygen()
+    print(f'private key: {key.hex()}')
     if password:
         polyseed.crypt(password)
     return polyseed
@@ -26,7 +29,7 @@ def recover(phrase: str, password: Optional[str]) -> Polyseed:
         if password:
             polyseed.crypt(password)
         else:
-            raise Exception('Password needed but not provided! Abort!')
+            raise PolyseedMissingPasswordException('Password needed but not provided! Abort!')
     return polyseed
 
 def show_polyseed(polyseed: Polyseed) -> None:

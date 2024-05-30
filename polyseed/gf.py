@@ -41,12 +41,14 @@ class GFPoly:
         return result
 
     def encode(self) -> None:
-        self.coeffs = [*self.coeffs[:-1], self.eval()]
+        checksum = self.eval()
+        self.coeffs = [checksum, *self.coeffs[1:]]
 
     def check(self) -> bool:
         return self.eval() == 0
 
-    def gf_elem_mul2(self, x: int) -> int:
+    @staticmethod
+    def gf_elem_mul2(x: int) -> int:
         if x < 1024:
             return 2 * x
         return polyseed_mul2_table[x % 8] + 16 * ((x - 1024) // 8)
