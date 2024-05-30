@@ -15,15 +15,18 @@ from .pbkdf2 import pbkdf2_sha256
 from typing import Optional
 
 def generate(password: Optional[str]) -> Polyseed:
-    polyseed = Polyseed.create(0)  # TODO: wht is sane or do I need to expose to arguments?
+    polyseed = Polyseed.create(0)  # TODO: what is sane or do I need to expose to arguments?
     if password:
         polyseed.crypt(password)
     return polyseed
 
 def recover(phrase: str, password: Optional[str]) -> Polyseed:
     polyseed = Polyseed.decode(phrase)
-    if polyseed.is_encrypted() and password:
-        polyseed.crypt(password)
+    if polyseed.is_encrypted():
+        if password:
+            polyseed.crypt(password)
+        else:
+            raise Exception('Password needed but not provided! Abort!')
     return polyseed
 
 def show_polyseed(polyseed: Polyseed) -> None:

@@ -40,8 +40,12 @@ if __name__ == '__main__':
         show_polyseed(polyseed)
         exit(0)
     elif args.command == 'recover':
-        polyseed = recover(args.phrase, args.password)
-        show_polyseed(polyseed)
+        try:
+            polyseed = recover(args.phrase, args.password)
+            show_polyseed(polyseed)
+        except Exception as e:
+            print(e)
+            exit(1)
         exit(0)
     elif args.command == 'pbkdf2_sha256':
         pbkdf2(args.password, args.salt, args.rounds, args.bytes)

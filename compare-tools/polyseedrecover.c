@@ -76,7 +76,7 @@ int main(int argc, char* argv[]) {
 
     polyseed_init();
 
-    polyseed_enable_features(FEATURE_FOO | FEATURE_BAR);
+    // polyseed_enable_features(FEATURE_FOO | FEATURE_BAR);
 
     if(argc < 2) {
 	    printf("You need to specify the seed phrase!\n");

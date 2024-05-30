@@ -63,10 +63,6 @@ static const polyseed_lang* get_lang_by_name(const char* name) {
     return NULL;
 }
 
-#define FEATURE_FOO 1
-#define FEATURE_BAR 2
-#define FEATURE_QUX 4
-
 int main(int argc, char* argv[]) {
 
     if (sodium_init() == -1) {
@@ -76,7 +72,6 @@ int main(int argc, char* argv[]) {
 
     polyseed_init();
 
-    polyseed_enable_features(FEATURE_FOO | FEATURE_BAR);
 
     const char* password = (argc > 1)?argv[1]:NULL;
     polyseed_status result;
@@ -84,7 +79,7 @@ int main(int argc, char* argv[]) {
 
     //create a new seed
     printf("Generating new seed...\n");
-    result = polyseed_create(argc > 1 ? FEATURE_FOO : 0, &seed1);
+    result = polyseed_create(0, &seed1);
     if (result != POLYSEED_OK) {
         printf("ERROR: %i\n", result);
         return 1;

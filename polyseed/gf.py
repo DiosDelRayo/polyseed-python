@@ -52,19 +52,19 @@ class GFPoly:
         return polyseed_mul2_table[x % 8] + 16 * ((x - 1024) // 8)
 
     def to_data(self) -> PolyseedData:
-        data = PolyseedData()  # Assuming PolyseedData() constructor initializes all fields to 0
-        data.checksum = self.coeffs[0]
+        data: PolyseedData = PolyseedData()  # Assuming PolyseedData() constructor initializes all fields to 0
+        data.checksum: int = self.coeffs[0]
         
-        secret = bytearray([0] * SECRET_BUFFER_SIZE)
-        extra_val = 0
-        extra_bits = 0
+        secret: bytes = bytearray([0] * SECRET_BUFFER_SIZE)
+        extra_val: int = 0
+        extra_bits: int = 0
 
-        word_bits = 0
-        word_val = 0
+        word_bits: int = 0
+        word_val: int = 0
 
-        secret_idx = 0
-        secret_bits = 0
-        seed_bits = 0
+        secret_idx: int = 0
+        secret_bits: int = 0
+        seed_bits: int = 0
 
         for i in range(POLY_NUM_CHECK_DIGITS, POLYSEED_NUM_WORDS):
             word_val = self.coeffs[i]
@@ -105,18 +105,18 @@ class GFPoly:
 
     @classmethod
     def from_data(cls, data: PolyseedData) -> 'GFPoly':
-        extra_val = (data.features << DATE_BITS) | data.birthday
-        extra_bits = FEATURE_BITS + DATE_BITS
+        extra_val: int = (data.features << DATE_BITS) | data.birthday
+        extra_bits: int = FEATURE_BITS + DATE_BITS
 
-        word_bits = 0
-        word_val = 0
+        word_bits: int = 0
+        word_val: int = 0
 
-        secret_idx = 0
-        secret_val = data.secret[secret_idx]
-        secret_bits = CHAR_BIT
-        seed_rem_bits = SECRET_BITS - CHAR_BIT
+        secret_idx: int = 0
+        secret_val = data.secret[secret_idx]  # TODO what type is that?
+        secret_bits: int = CHAR_BIT
+        seed_rem_bits: int = SECRET_BITS - CHAR_BIT
 
-        coeffs = [0] * POLYSEED_NUM_WORDS
+        coeffs: List[int] = [0] * POLYSEED_NUM_WORDS
 
         for i in range(DATA_WORDS):
             while word_bits < SHARE_BITS:
@@ -141,4 +141,4 @@ class GFPoly:
         assert secret_bits == 0
         assert extra_bits == 0
 
-        return GFPoly(tuple(coeffs))
+        return GFPoly(coeffs)

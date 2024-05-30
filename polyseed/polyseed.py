@@ -7,7 +7,8 @@ from .constants import (
     POLYSEED_STR_SIZE,
     POLYSEED_MONERO,
     POLYSEED_AEON,
-    POLYSEED_WOWNERO
+    POLYSEED_WOWNERO,
+    CLEAR_MASK
 )
 from .gf import GFPoly
 from .storage import PolyseedData
@@ -190,22 +191,21 @@ class Polyseed:
     def crypt(self, password: Union[str, bytes]) -> None:
         if not self.seed:
             raise Exception('Polyseed has acctually no seed')
-        password: bytes = normalize('NFD', password).encode() if type(password) == 'str' else password
+        password: bytes = normalize('NFD', password).encode() if type(password) == str else password
         if len(password) >= POLYSEED_STR_SIZE:
             raise PolyseedStringSizeExceededException('password too long')
         polyseed_mask = b'POLYSEED mask'
-        salt: bytearray = bytearray(polyseed_mask + bytes(16 - len(polyseed_mask)))
+        salt: bytearray = bytearray(polyseed_mask + b'\0' * (16 - len(polyseed_mask)))
         salt[14] = 0xff;
         salt[15] = 0xff;
-        mask = pbkdf2_sha256(passwd, bytes(salt), KDF_NUM_ITERATIONS, 32)
+        mask = pbkdf2_sha256(password, bytes(salt)[:16], KDF_NUM_ITERATIONS, 32)
         secret = bytearray(self.seed.secret)
         for i in range(0, SECRET_SIZE):
             secret[i] ^= mask[i]
         secret[SECRET_SIZE - 1] &= CLEAR_MASK
         self.seed.secret = bytes(secret)
         self.seed.set_encrypted()
-        self.poly = GFPoly.from_data(seed)
-        self.poly.encode()
+        self.poly = GFPoly.from_data(self.seed)
         self.seed = self.poly.to_data()
 
     def is_encrypted(self) -> bool:
