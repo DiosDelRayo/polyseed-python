@@ -17,7 +17,7 @@ from .pbkdf2 import pbkdf2_sha256
 from typing import Optional
 
 def seed_phrase_from_bytes(random: bytes, coin: int = POLYSEED_MONERO, language: Optional[str] = None) -> Polyseed:
-    polyseed = Polyseed.create(0, coin, lambda: random)
+    polyseed = Polyseed.create(0, coin, lambda size: random[:size])
     if language:
         try:
             return polyseed.encode(Language.get_lang_by_code(language))
