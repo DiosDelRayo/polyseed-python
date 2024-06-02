@@ -137,7 +137,7 @@ class Polyseed:
         return Polyseed(seed, poly, coin)
 
     @staticmethod
-    def decode_explicit(phrase: str, coin: int, lang: Language) -> 'Polyseed':
+    def decode_explicit(phrase: str, lang: Language, coin: int = POLYSEED_MONERO) -> 'Polyseed':
         if self.coin < 0 or self.coin >= GF_SIZE:
             raise Exception('No known coin')
 

@@ -4,9 +4,10 @@ from .constants import (
     INTERNAL_FEATURES,
     USER_FEATURES,
     USER_FEATURES_MASK,
-    ENCRYPTED_MASK
+    ENCRYPTED_MASK,
+    POLYSEED_MONERO
 )
-from .exceptions import PolyseedMissingPasswordException
+from .exceptions import PolyseedMissingPasswordException, PolyseedLanguageNotFoundException
 from .lang import Language
 from .storage import PolyseedData
 from .gf import GFPoly
@@ -15,8 +16,17 @@ from .pbkdf2 import pbkdf2_sha256
 
 from typing import Optional
 
-def generate(password: Optional[str]) -> Polyseed:
-    polyseed = Polyseed.create()  # TODO: what is sane or do I need to expose to arguments?
+def seed_phrase_from_bytes(random: bytes, coin: int = POLYSEED_MONERO, language: Optional[str] = None) -> Polyseed:
+    polyseed = Polyseed.create(0, coin, lambda: random)
+    if language:
+        try:
+            return polyseed.encode(Language.get_lang_by_code(language))
+        except PolyseedLanguageNotFoundException:
+            pass
+    return polyseed.encode()
+
+def generate(password: Optional[str], coin: int = POLYSEED_MONERO) -> Polyseed:
+    polyseed = Polyseed.create(0, coin)
     key = polyseed.keygen()
     print(f'private key: {key.hex()}')
     if password:
