@@ -23,11 +23,26 @@ from .exceptions import (
 )
 from .lang import Language
 from .pbkdf2 import pbkdf2_sha256
+from .base58 import encode as b58
+from .ed25519 import public_from_secret, scalar_reduce
+from .keccak import keccak_256
 
+from binascii import hexlify, unhexlify
 from time import time
 from unicodedata import normalize
 from struct import pack
 from typing import Union, Optional, Callable
+
+
+NET_MAIN = "main"
+NET_STAGE = "stage"
+NET_TEST = "test"
+
+MASTERADDR_NETBYTES = {
+    NET_MAIN: 18,
+    NET_TEST: 24,
+    NET_STAGE: 53
+}
 
 
 class Polyseed:
@@ -36,9 +51,20 @@ class Polyseed:
         self.seed: PolyseedData = seed
         self.poly: GFPoly = poly
         self.coin: int = coin
+        self._secret_spend_key_bytes: Optional[bytes] = None
+        self._secret_view_key_bytes: Optional[bytes] = None
+        self._secret_spend_key: Optional[str] = None
+        self._secret_view_key: Optional[str] = None
+        self._public_spend_key: Optional[str] = None
+        self._public_viewkey: Optional[str] = None
+        self._public_address: Dict[str, Optional[str]] = {
+            NET_MAIN: None,
+            NET_TEST: None,
+            NET_STAGE: None
+        }
 
     @staticmethod
-    def create(features: int = 0, coin: int = POLYSEED_MONERO, random: Callable[[int], bytes] = random_secret) -> 'Polyseed':
+    def create(timestamp: Optional[int] = None, features: int = 0, coin: int = POLYSEED_MONERO, random: Callable[[int], bytes] = random_secret) -> 'Polyseed':
         seed_features = make_features(features)
         if not polyseed_features_supported(seed_features):
             raise PolyseedFeatureUnsupported()
@@ -46,7 +72,7 @@ class Polyseed:
         secret_bytes = bytearray(random(SECRET_SIZE))
         secret_bytes[-1] &= CLEAR_MASK
         seed: PolyseedData = PolyseedData(
-            birthday_encode(time()),
+            birthday_encode(timestamp or time()),
             seed_features,
             bytes(secret_bytes),
             0
@@ -215,3 +241,68 @@ class Polyseed:
         if not self.seed:
             raise Exception('Polyseed has acctually no seed')
         return is_encrypted(self.seed.features)
+
+    @property
+    def secret_spend_key(self) -> str:
+        if not self._secret_spend_key:
+            self._secret_spend_key = hexlify(self.secret_spend_key_bytes).decode()
+        return self._secret_spend_key
+
+    @property
+    def secret_spend_key_bytes(self) -> bytes:
+        if not self._secret_spend_key_bytes:
+            self._secret_spend_key_bytes = self.keygen()  # TODO: 2024-06-30, check if that is correct
+        return self._secret_spend_key_bytes
+
+    @property
+    def secret_view_key(self) -> str:
+        if not self._secret_view_key:
+            self._secret_view_key = hexlify(self.secret_view_key_bytes).decode()
+        return self._secret_view_key
+
+    @property
+    def secret_view_key_bytes(self) -> bytes:
+        if not self._secret_view_key_bytes:
+            self._secret_view_key_bytes = scalar_reduce(keccak_256(self.secret_spend_key_bytes).digest())
+        return self._secret_view_key_bytes
+
+    @property
+    def public_spend_key(self):
+        if not self._public_spend_key:
+            self._public_spend_key = hexlify(public_from_secret(self.secret_spend_key_bytes)).decode()
+        return self._public_spend_key
+
+    @property
+    def public_view_key(self):
+        if not self._public_viewkey:
+            self._public_viewkey = hexlify(public_from_secret(self.secret_view_key_bytes)).decode()
+        return self._public_viewkey
+
+    def public_address(self, network: str = NET_MAIN):
+        if network not in MASTERADDR_NETBYTES.keys():
+            raise Exception(f'Unkown network: {network}')
+        net = MASTERADDR_NETBYTES.get(network)
+        if not self._public_address[network]:
+            self._public_address[network] = b58(f'{net:x}{self.public_spend_key}{self.public_view_key}'.encode() + keccak_256(unhexlify(f'{net:x}{self.public_spend_key}{self.public_view_key}')).hexdigest()[:8].encode())
+        return self._public_address[network]
+
+    @property
+    def public_address_main(self) -> str:
+        return self.public_address(NET_MAIN)
+
+    @property
+    def public_address_test(self) -> str:
+        return self.public_address(NET_TEST)
+
+    @property
+    def public_address_stage(self) -> str:
+        return self.public_address(NET_STAGE)
+
+    def wallet_data(self, network: str = NET_MAIN) -> str:
+        return f"""
+polyseed:         {self.encode()}
+address:          {self.public_address(network)}
+secret spend key: {self.secret_spend_key}
+secret view key:  {self.secret_view_key}
+height:           {self.get_birthday()}
+        """.strip()
