@@ -65,7 +65,7 @@ class TestMyModule(unittest.TestCase):
     def test_create(self):
         def notsorandom(size: int) -> bytes:
             return b'A' * size
-        ps = polyseed.polyseed.Polyseed.create(random=notsorandom)
+        ps = polyseed.polyseed.Polyseed.create(1716876000, random=notsorandom)
         self.assertEqual(ps.keygen().hex(), 'a46fceb3c871c54e9771151f6e79c7f15d7216227bd51aa8679b257282c9d2bd')
 
     def test_generate_recover_key(self):

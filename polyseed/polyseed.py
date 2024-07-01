@@ -38,7 +38,7 @@ class Polyseed:
         self.coin: int = coin
 
     @staticmethod
-    def create(features: int = 0, coin: int = POLYSEED_MONERO, random: Callable[[int], bytes] = random_secret) -> 'Polyseed':
+    def create(timestamp: Optional[int] = None, features: int = 0, coin: int = POLYSEED_MONERO, random: Callable[[int], bytes] = random_secret) -> 'Polyseed':
         seed_features = make_features(features)
         if not polyseed_features_supported(seed_features):
             raise PolyseedFeatureUnsupported()
@@ -46,7 +46,7 @@ class Polyseed:
         secret_bytes = bytearray(random(SECRET_SIZE))
         secret_bytes[-1] &= CLEAR_MASK
         seed: PolyseedData = PolyseedData(
-            birthday_encode(time()),
+            birthday_encode(timestamp or time()),
             seed_features,
             bytes(secret_bytes),
             0
