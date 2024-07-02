@@ -1,6 +1,7 @@
 import unittest
 import polyseed
 
+
 class TestMyModule(unittest.TestCase):
     # Your test cases will go here
 
@@ -89,7 +90,6 @@ class TestMyModule(unittest.TestCase):
         key2 = ps2.keygen().hex()
         self.assertEqual(phrase, phrase2)
         self.assertEqual(key1, key2)
-
 
 
 if __name__ == '__main__':

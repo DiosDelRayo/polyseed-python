@@ -10,7 +10,7 @@ with open("LICENSE.txt", "r") as f:
 
 setup(
     name="polyseed",
-    version="0.1.0",
+    version="0.1.2",
     author="DiosDelRayo",
     author_email="no@spam",
     description="A Python module for polyseed, compatible with https://github.com/tevador/polyseed.git",
