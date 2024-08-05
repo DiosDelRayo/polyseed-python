@@ -11,7 +11,7 @@ sha256-github: version
 
 clean:
 	@echo 'clean py cache files...'
-	@find polyseed -name __pycache__ -exec rm -rf \{\} \; >&2
+	@find polyseed -name __pycache__ -exec rm -rf \{\} \; >&2 || true
 
 checksums: clean
 	@echo 'generate sha256 checksums...'
