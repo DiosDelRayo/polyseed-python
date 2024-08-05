@@ -11,7 +11,7 @@ words = words.decode().split(' ')
 
 class LanguageChineseSimplified(Language):
 
-    code: str = 'zh_s'
+    code: str = 'zh_Hans_CN'
     name: str = '中文(简体)'
     name_en: str = 'Chinese (Simplified)'
     separator: str = ' '

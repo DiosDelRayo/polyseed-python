@@ -194,13 +194,12 @@ class Language:
 
 from .lang_en import LanguageEnglish
 # Import language data from other files
-# from .lang_en import polyseed_lang_en
-# from lang_jp import polyseed_lang_jp
-# from lang_ko import polyseed_lang_ko
-# from lang_es import polyseed_lang_es
-# from lang_zh_s import polyseed_zh_s
-# from lang_zh_t import polyseed_zh_t
-# from lang_fr import polyseed_lang_fr
-# from lang_it import polyseed_lang_it
-# from lang_cs import polyseed_lang_cs
-# from lang_pt import polyseed_lang_pt
+from .lang_jp import LanguageJapanese
+from .lang_ko import LanguageKorean
+from .lang_es import LanguageSpanish
+from .lang_zh_s import LanguageChineseSimplified
+from .lang_zh_t import LanguageChineseTraditional
+from .lang_fr import LanguageFrench
+from .lang_it import LanguageItalian
+from .lang_cs import LanguageCzech
+from .lang_pt import LanguagePortuguese
