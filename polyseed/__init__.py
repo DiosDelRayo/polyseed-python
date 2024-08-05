@@ -17,7 +17,7 @@ from .pbkdf2 import pbkdf2_sha256
 from typing import Optional
 
 
-def seed_phrase_from_bytes(random: bytes, timestamp: Optional[int] = None, coin: int = POLYSEED_MONERO, language: Optional[str] = None) -> Polyseed:  # TODO: 2024-07-02, language selection not working!
+def seed_phrase_from_bytes(random: bytes, timestamp: Optional[int] = None, coin: int = POLYSEED_MONERO, language: Optional[str] = None) -> Polyseed:
     polyseed = Polyseed.create(timestamp, 0, coin, lambda size: random[:size])
     if language:
         try:
@@ -29,7 +29,6 @@ def seed_phrase_from_bytes(random: bytes, timestamp: Optional[int] = None, coin:
 def generate(timestamp: Optional[int] = None, password: Optional[str] = None, coin: int = POLYSEED_MONERO) -> Polyseed:
     polyseed = Polyseed.create(timestamp, 0, coin)
     key = polyseed.keygen()
-    print(f'private key: {key.hex()}')
     if password and password != '':
         polyseed.crypt(password)
     return polyseed

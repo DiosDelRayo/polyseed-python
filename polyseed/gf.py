@@ -114,7 +114,7 @@ class GFPoly:
         word_val: int = 0
 
         secret_idx: int = 0
-        secret_val = data.secret[secret_idx]  # TODO what type is that?
+        secret_val: int = data.secret[secret_idx]
         secret_bits: int = CHAR_BIT
         seed_rem_bits: int = SECRET_BITS - CHAR_BIT
 

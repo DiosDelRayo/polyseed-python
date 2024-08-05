@@ -57,13 +57,6 @@ class Polyseed:
         # MEMZERO_LOC(poly)
         return Polyseed(poly.to_data(), poly, coin)
 
-    # TODO: makes this any sense in Python???
-    @staticmethod
-    def polyseed_free(seed):
-        if seed:
-            # MEMZERO_PTR(seed, polyseed_data)
-            seed = None
-
     def get_birthday(self) -> int:
         if not self.seed:
             raise Exception('Polyseed has acctually no seed')
@@ -100,8 +93,6 @@ class Polyseed:
             out = normalize('NFC', out)
             if len(out) >= POLYSEED_STR_SIZE:
                 raise PolyseedStringSizeExceededException()
-        # TODO: MEMZERO_LOC(poly)
-        # TODO: MEMZERO_LOC(str_tmp)
         return out
 
     @staticmethod
@@ -179,13 +170,9 @@ class Polyseed:
         salt[13] = 0xff
         salt[14] = 0xff
         salt[15] = 0xff
-        salt[16] = self.coin  # TODO: doublecheck and test
-        salt[20] = self.seed.birthday  # TODO: doublecheck and test
-        salt[24] = self.seed.features  # TODO: doublecheck and test
-        # salt.extend(pack('<I', self.coin))
-        # salt.extend(pack('<I', self.seed.birthday))
-        # salt.extend(pack('<I', self.seed.features))
-        print(f'salt:        {salt.hex()}')
+        salt[16] = self.coin
+        salt[20] = self.seed.birthday
+        salt[24] = self.seed.features
         
         # Perform key derivation
         return pbkdf2_sha256(self.seed.secret, bytes(salt), KDF_NUM_ITERATIONS, key_size)

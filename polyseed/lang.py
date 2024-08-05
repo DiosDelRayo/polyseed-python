@@ -66,7 +66,7 @@ class Language:
         return -1
 
     @staticmethod
-    def compare_str(key: str, elm):  # TODO: ?
+    def compare_str(key: str, elm):
         for i, (k, e) in enumerate(zip(key, elm)):
             if k == "\0" or k != e:
                 break
@@ -155,7 +155,6 @@ class Language:
             have_lang = True
         if not have_lang:
             raise PolyseedLanguageException()
-        print(f'Words:       {out}')
         return out, lang
 
     @classmethod
