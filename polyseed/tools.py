@@ -1,8 +1,7 @@
 from .constants import CLEAR_MASK
-from typing import List
-from random import randint
+from secrets import randbelow
 
-def random_secret(size: int) -> List[int]:
-    out = [randint(0, 255) for _ in range(size)]
+def random_secret(size: int) -> list[int]:
+    out = [randbelow(255) for _ in range(size)]
     out[size - 1] &= CLEAR_MASK
     return out
